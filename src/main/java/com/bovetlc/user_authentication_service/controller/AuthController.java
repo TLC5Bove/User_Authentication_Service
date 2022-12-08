@@ -17,10 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 @AllArgsConstructor
 public class AuthController {
-
-    // TODO: 1. Post mapping: Register: Admin
-    // TODO: 2. Post mapping: Log in - Admin
-
     private final AuthService authService;
 
     @PostMapping("/register")

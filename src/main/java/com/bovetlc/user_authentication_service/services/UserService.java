@@ -8,6 +8,8 @@ import com.bovetlc.user_authentication_service.repository.AdminRepository;
 import com.bovetlc.user_authentication_service.repository.UserRepository;
 import com.bovetlc.user_authentication_service.security.jwt.JwtUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,12 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @AllArgsConstructor
 public class UserService implements UserDetailsService {
-
-    // TODO: 1. Register User - Admin
-    // TODO: 2. User Sign in - Admin
-    // TODO: 3. Deposit into account or Withdraw from account: Update balance +
-    // TODO: 4. Deactivate account
-
     private final UserRepository userRepository;
     private final AdminRepository adminRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -32,7 +28,7 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByEmail(username)
+        return userRepository.findByUsername(username)
                 .orElseThrow(
                         () -> new UsernameNotFoundException("User with username: " + username + " not found")
                 );
@@ -129,5 +125,55 @@ public class UserService implements UserDetailsService {
                 admin.getEmail(),
                 admin.getUsername(),
                 jwtToken);
+    }
+
+    public ResponseEntity<UserResponse> depositAmountIntoUserAccount(Long id, String authToken, Double amount) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new UsernameNotFoundException("User with id: "+ id + " not found")
+        );
+        String username = jwtUtils.extractUsername(authToken);
+        if (!user.getUsername().matches(username)){
+            throw new IllegalStateException("Cannot deposit into this account");
+        }
+        Double balance = user.getBalance();
+
+        user.setBalance(balance + amount);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(
+                new UserResponse(
+                        user.getName(),
+                        user.getEmail(),
+                        user.getUsername(),
+                        user.getBalance(),
+                        "Balance Updated"
+                )
+        );
+    }
+
+    public ResponseEntity<UserResponse> withdrawAmountFromUserAccount(Long id, String authToken, Double amount) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new UsernameNotFoundException("User with id: "+ id + " not found")
+        );
+        String username = jwtUtils.extractUsername(authToken);
+        if (!user.getUsername().matches(username)){
+            throw new IllegalStateException("Cannot deposit into this account");
+        }
+        Double balance = user.getBalance();
+
+        if (balance < amount){
+            throw new IllegalStateException("Balance is not enough to withdraw this amount: $" + amount);
+        }
+
+        user.setBalance(balance - amount);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(
+                new UserResponse(
+                        user.getName(),
+                        user.getEmail(),
+                        user.getUsername(),
+                        user.getBalance(),
+                        "Balance Updated"
+                )
+        );
     }
 }

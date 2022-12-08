@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class Portfolio {
 
     @SequenceGenerator(
@@ -24,28 +26,28 @@ public class Portfolio {
             generator = "portfolio_sequence"
     )
     @Id
-    public Long id;
-    public String portfolioName;
-    public Double portfolioValue;
-    public Boolean isActive;
+    private Long id;
+    private String portfolioName;
+    private Double portfolioValue;
+    private Boolean isActive;
     @ManyToOne
     @JoinColumn(
             nullable = false,
             name = "user_id"
     )
-    public User user;
+    private User user;
     @OneToMany
     @JoinColumn(
             nullable = false,
             name = "user_stock_id"
     )
-    public List<UserStock> stocks;
+    private List<UserStock> stocks;
 
-    public Portfolio(String portfolioName, User user) {
+    public Portfolio(String portfolioName, User user, List<UserStock> stocks) {
         this.portfolioName = portfolioName;
         this.user = user;
         this.portfolioValue = 0.0;
         this.isActive = true;
-        this.stocks = new ArrayList<>();
+        this.stocks = stocks;
     }
 }
