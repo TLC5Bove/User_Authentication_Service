@@ -37,9 +37,10 @@ public class User implements UserDetails {
     private String password;
     private Double balance;
     private LocalDateTime dateJoined;
+    private LocalDateTime dateDeactivated;
     private Boolean locked;
     private Boolean enabled;
-    private final String authority = "User";
+    private final String authority = "USER";
 
 
     public User(String name, String email, String password, String username) {
@@ -51,6 +52,7 @@ public class User implements UserDetails {
         this.dateJoined = LocalDateTime.now();
         this.locked = false;
         this.enabled = false;
+        this.dateDeactivated = null;
     }
 
     @Override
