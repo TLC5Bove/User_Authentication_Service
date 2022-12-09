@@ -12,4 +12,7 @@ import lombok.ToString;
 public class GenericRequest {
     private Double amount;
     private String portfolioName;
+    private String ticker;
+    private String tickerList;
+    private Integer quantity;
 }

@@ -35,9 +35,17 @@ public class UserStock{
     )
     private User user;
 
-    public UserStock(Ticker product, Integer quantity, User user) {
+    @OneToOne
+    @JoinColumn(
+            nullable = false,
+            name = "portfolio_id"
+    )
+    private Portfolio portfolio;
+
+    public UserStock(Ticker product, Integer quantity, User user, Portfolio portfolio) {
         this.product = product;
         this.quantity = quantity;
         this.user = user;
+        this.portfolio = portfolio;
     }
 }

@@ -6,9 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Getter
 @Setter
@@ -36,18 +33,11 @@ public class Portfolio {
             name = "user_id"
     )
     private User user;
-    @OneToMany
-    @JoinColumn(
-            nullable = false,
-            name = "user_stock_id"
-    )
-    private List<UserStock> stocks;
 
-    public Portfolio(String portfolioName, User user, List<UserStock> stocks) {
+    public Portfolio(String portfolioName, User user) {
         this.portfolioName = portfolioName;
         this.user = user;
         this.portfolioValue = 0.0;
         this.isActive = true;
-        this.stocks = stocks;
     }
 }
