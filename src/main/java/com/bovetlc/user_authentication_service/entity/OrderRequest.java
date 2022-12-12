@@ -5,17 +5,17 @@ import com.bovetlc.user_authentication_service.entity.enums.Side;
 import com.bovetlc.user_authentication_service.entity.enums.Status;
 import com.bovetlc.user_authentication_service.entity.enums.Ticker;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.Hibernate;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Getter
 @Setter
-@EqualsAndHashCode
 @NoArgsConstructor
 public class OrderRequest {
     // TODO 1. CREATE ORDER REQUEST TO SEND ORDER
@@ -66,5 +66,18 @@ public class OrderRequest {
         this.portfolio = portfolio;
         this.orderDate = LocalDateTime.now();
         this.status = Status.PENDING;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        OrderRequest that = (OrderRequest) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

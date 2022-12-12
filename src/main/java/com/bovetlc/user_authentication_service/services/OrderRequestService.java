@@ -78,6 +78,18 @@ public class OrderRequestService {
         return order;
     }
 
+    public OrderRequest getAnOrderByOsId(String osid){
+        return orderRepository.findByOsId(osid).orElseThrow(
+                () -> new IllegalStateException("" +
+                        "Order with OsId "+ osid +" " +
+                        "does not exist.")
+        );
+    }
+
+    public void updateOrderRequest(OrderRequest order){
+        orderRepository.save(order);
+    }
+
     public List<OrderRequest> getAllUserOrders(String token){
         String username = getUsername(token);
         User user = userRepository.findByUsername(username).orElseThrow(

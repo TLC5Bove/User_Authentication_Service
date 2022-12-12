@@ -23,7 +23,6 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 public class UserController {
     private final UserService userService;
     private final PortfolioService portfolioService;
-
     private final UserStockService userStockService;
 
     @PutMapping("/deposit/{id}")
