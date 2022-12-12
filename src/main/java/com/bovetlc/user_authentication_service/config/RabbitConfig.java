@@ -1,9 +1,10 @@
 package com.bovetlc.user_authentication_service.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfig {
     public static final String CLIENT_QUEUE = "client_queue";
     public static final String ORDER_QUEUE = "order_queue";
-    public static final String CLIENT_EXCHANGE = "completion_exchange";
+    public static final String CLIENT_EXCHANGE = "client_exchange";
     public static final String ORDER_EXCHANGE = "order_exchange";
     public static final String ROUTING_KEY = "message_routingKey";
 
@@ -45,5 +46,17 @@ public class RabbitConfig {
                 .bind(order_queue())
                 .to(order_exchange())
                 .with(ROUTING_KEY);
+    }
+
+    @Bean
+    public MessageConverter messageConverter() {
+        return  new Jackson2JsonMessageConverter();
+    }
+
+    @Bean
+    public AmqpTemplate template(ConnectionFactory connectionFactory) {
+        RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        template.setMessageConverter(messageConverter());
+        return  template;
     }
 }

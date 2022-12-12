@@ -98,6 +98,17 @@ public class PortfolioService {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
+    public void updatePortfolioValue(Long id, Double value){
+        Portfolio port = portfolioRepository.findById(id).orElseThrow(
+                () -> new IllegalStateException("Portfolio with id: " + id +" does not exist.")
+        );
+
+        Double portValue = port.getPortfolioValue();
+        port.setPortfolioValue(portValue + value);
+
+        portfolioRepository.save(port);
+    }
+
     public ResponseEntity<String> deactivatePortfolio(Long id, String token){
         String userName = getUsernameFromToken(token);
 

@@ -18,10 +18,6 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 public class OrderRequest {
-    // TODO 1. CREATE ORDER REQUEST TO SEND ORDER
-    // TODO 2. RUN VALIDATIONS ON THE ORDERS
-    // TODO 3. SEND ORDER TO OPS IF VALIDATION IS SUCCESSFUL
-    // TODO 4. SAVE ORDER REQUEST TO DB IF RESPONSE IS A SUCCESS
     @Id
     @SequenceGenerator(
             name = "request_sequence",
@@ -54,6 +50,8 @@ public class OrderRequest {
             name = "port_id"
     )
     private Portfolio portfolio;
+    private Double totalPrice;
+    private Double cummPrice;
 
     public OrderRequest(Ticker ticker, Integer quantity, Double price, Side side, OrderType type, User user, String OSID, Portfolio portfolio) {
         this.ticker = ticker;
@@ -66,6 +64,8 @@ public class OrderRequest {
         this.portfolio = portfolio;
         this.orderDate = LocalDateTime.now();
         this.status = Status.PENDING;
+        this.totalPrice = this.quantity * this.price;
+        this.cummPrice = null;
     }
 
     @Override
