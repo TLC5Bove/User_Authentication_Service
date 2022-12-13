@@ -8,11 +8,9 @@ import com.bovetlc.user_authentication_service.services.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v1/auth")
 @AllArgsConstructor
@@ -21,7 +19,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody UserRequest userRequest){
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerUser(userRequest));
+        return ResponseEntity.status(HttpStatus.OK).body(authService.registerUser(userRequest));
     }
 
     @PostMapping("/admin/register")
