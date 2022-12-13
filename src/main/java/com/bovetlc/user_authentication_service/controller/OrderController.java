@@ -10,12 +10,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Objects;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/api/v1/order")
 @AllArgsConstructor
 class OrderController {
 
@@ -29,6 +30,12 @@ class OrderController {
         String token = Objects.requireNonNull(request.getFirst(AUTHORIZATION)).substring(7);
         OrderRequest order = orderRequestService.createNewOrderRequest(orderDTO, token);
         return ResponseEntity.ok(order);
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<List<OrderRequest>> getAllUserOrders(@RequestHeader HttpHeaders headers){
+        String token = Objects.requireNonNull(headers.getFirst(AUTHORIZATION)).substring(7);
+        return ResponseEntity.ok(orderRequestService.getAllUserOrders(token));
     }
 
     // get an order by id
