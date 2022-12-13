@@ -112,19 +112,6 @@ public class UserController {
 //        return userStockService.addManyStocksToPortfolio(id, tickerList, authToken);
 //    }
 
-    @PutMapping("/portfolio/stock/{id}")
-    public ResponseEntity<PortfolioResponse> updateStockQuantityInPortfolio(
-            @PathVariable("id") Long id,
-            @RequestHeader HttpHeaders request,
-            @RequestBody GenericRequest genericRequest){
-        String authToken = Objects.requireNonNull(request.getFirst(AUTHORIZATION)).substring(7);
-        return userStockService.updateStockQuantityInAPortfolio(
-                id,
-                authToken,
-                genericRequest.getQuantity(),
-                Ticker.valueOf(genericRequest.getTicker()));
-    }
-
     @PutMapping("/portfolio/stock/delete/{id}")
     public ResponseEntity<PortfolioResponse> removeStockFromPortfolio(
             @PathVariable("id") Long id,

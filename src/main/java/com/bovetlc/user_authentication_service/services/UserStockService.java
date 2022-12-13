@@ -116,19 +116,13 @@ public class UserStockService {
 //        return portfolioService.getPortfolioById(id, authToken);
 //    }
 
-    public ResponseEntity<PortfolioResponse> updateStockQuantityInAPortfolio(Long id, String authToken, Integer quantity, Ticker ticker){
-        String username = getUsernameFromToken(authToken);
+    public void updateStockQuantityInAPortfolio(Long id, Integer quantity, Ticker ticker){
 
         Portfolio portfolio = portfolioRepository.findById(id).orElseThrow(
                 () -> new IllegalStateException("" +
                         "Portfolio with id: " + id + " " +
                         "does not exist")
         );
-
-        if (!username.equals(portfolio.getUser().getUsername())){
-            throw new IllegalStateException("" +
-                    "User does not own this portfolio.");
-        }
 
         List<UserStock> userStocks = userStockRepository.findAllByPortfolio(portfolio).orElse(new ArrayList<>());
 
@@ -148,8 +142,6 @@ public class UserStockService {
         stock.setQuantity(stockQuantity+quantity);
 
         userStockRepository.save(stock);
-
-        return portfolioService.getPortfolioById(id, authToken);
     }
 
     public ResponseEntity<PortfolioResponse> removeStockFromAPortfolio(Long id, String authToken, Ticker ticker){

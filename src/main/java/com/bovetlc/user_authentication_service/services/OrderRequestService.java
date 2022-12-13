@@ -3,18 +3,20 @@ package com.bovetlc.user_authentication_service.services;
 import com.bovetlc.user_authentication_service.entity.OrderRequest;
 import com.bovetlc.user_authentication_service.entity.Portfolio;
 import com.bovetlc.user_authentication_service.entity.User;
-import com.bovetlc.user_authentication_service.entity.UserStock;
 import com.bovetlc.user_authentication_service.entity.dto.OrderDTO;
 import com.bovetlc.user_authentication_service.entity.enums.Side;
 import com.bovetlc.user_authentication_service.entity.enums.Status;
+import com.bovetlc.user_authentication_service.messaging.MQPublisher;
 import com.bovetlc.user_authentication_service.repository.OrderRequestRepository;
 import com.bovetlc.user_authentication_service.repository.PortfolioRepository;
 import com.bovetlc.user_authentication_service.repository.UserRepository;
 import com.bovetlc.user_authentication_service.security.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +26,10 @@ public class OrderRequestService {
     private final PortfolioRepository portfolioRepository;
     private final UserStockService userStockService;
     private final JwtUtils jwtUtils;
+    private final OrderValidationService orderValidationService;
+
+    @Autowired
+    MQPublisher mqPublisher;
 
     private String getUsername(String authToken){
         return jwtUtils.extractUsername(authToken);
@@ -48,6 +54,9 @@ public class OrderRequestService {
                         "Portfolio with id "+ portId +" " +
                         "does not exist.")
         );
+        orderDTO.setOSID(UUID.randomUUID().toString());
+        System.out.println("OSID: "+ orderDTO.getOSID());
+
         OrderRequest order = new OrderRequest(
                 orderDTO.getProduct(),
                 orderDTO.getQuantity(),
@@ -59,7 +68,22 @@ public class OrderRequestService {
                 portfolio
         );
 
-        orderRepository.save(order);
+        if ((order.getSide() == Side.BUY) && orderValidationService.balanceIsEnoughToBuy(order)) {
+            mqPublisher.publishClientOrder(orderDTO);
+            Double currentBalance = user.getBalance();
+            user.setBalance(currentBalance - order.getTotalPrice());
+            orderRepository.save(order);
+        }else {
+            return new OrderRequest();
+        }
+
+        if ((order.getSide() == Side.SELL) && !orderValidationService.isNotUserTheOwnerOfStock(order)){
+            mqPublisher.publishClientOrder(orderDTO);
+            orderRepository.save(order);
+        }else {
+            return new OrderRequest();
+        }
+        System.out.println(order);
         return order;
     }
 
@@ -79,7 +103,7 @@ public class OrderRequestService {
     }
 
     public OrderRequest getAnOrderByOsId(String osid){
-        return orderRepository.findByOsId(osid).orElseThrow(
+        return orderRepository.findByOSID(osid).orElseThrow(
                 () -> new IllegalStateException("" +
                         "Order with OsId "+ osid +" " +
                         "does not exist.")
@@ -105,26 +129,6 @@ public class OrderRequestService {
 
         orderRequest.setStatus(status);
         orderRepository.save(orderRequest);
-
-        return orderRequest;
-    }
-
-    public OrderRequest updateOrderQuantity(int quantity, Long id, String token, Long port){
-        // add if side is BUY
-        // deduct if side is SELL
-        OrderRequest orderRequest = getAnOrderById(id, token);
-        Portfolio portfolio = orderRequest.getPortfolio();
-
-        int current_quantity = orderRequest.getQuantity();
-        if (orderRequest.getSide() == Side.BUY){
-            orderRequest.setQuantity(current_quantity+quantity);
-        }else{
-            orderRequest.setQuantity(current_quantity-quantity);
-            quantity *= -1;
-        }
-        userStockService.updateStockQuantityInAPortfolio(portfolio.getId(), token, quantity, orderRequest.getTicker());
-        orderRepository.save(orderRequest);
-
 
         return orderRequest;
     }

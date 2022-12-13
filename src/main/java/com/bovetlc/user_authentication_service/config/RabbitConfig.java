@@ -1,9 +1,10 @@
 package com.bovetlc.user_authentication_service.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,7 +14,7 @@ public class RabbitConfig {
     public static final String ORDER_QUEUE = "order_queue";
     public static final String CANC_FROM_CLIENT_QUEUE = "canc_from_client_queue";
     public static final String CANC_COMP_FROM_OPS_QUEUE = "canc_complete_from_ops_queue";
-    public static final String CLIENT_EXCHANGE = "completion_exchange";
+    public static final String CLIENT_EXCHANGE = "client_exchange";
     public static final String ORDER_EXCHANGE = "order_exchange";
     public static final String CANC_FROM_CLIENT_EXCHANGE = "canc_from_client_exchange";
     public static final String CANC_COMP_FROM_OPS_EXCHANGE = "canc_complete_from_ops_exchange";
@@ -66,6 +67,7 @@ public class RabbitConfig {
                 .to(order_exchange())
                 .with(ROUTING_KEY);
     }
+
     @Bean
     public Binding send_canc_binding() {
         return BindingBuilder
@@ -80,5 +82,17 @@ public class RabbitConfig {
                 .bind(canc_comp_from_ops_queue())
                 .to(canc_comp_from_ops_exchange())
                 .with(ROUTING_KEY);
+    }
+
+    @Bean
+    public MessageConverter messageConverter() {
+        return  new Jackson2JsonMessageConverter();
+    }
+
+    @Bean
+    public AmqpTemplate template(ConnectionFactory connectionFactory) {
+        RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        template.setMessageConverter(messageConverter());
+        return  template;
     }
 }
